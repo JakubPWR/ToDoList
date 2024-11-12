@@ -1,26 +1,28 @@
-import React from "react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, createContext } from "react";
 import { StyledBody } from "../styles/appStyles";
 import { GlobalStyle } from "../styles/globalStyles";
 import { ToDoBody } from "../components/toDoBody";
 import { LeftPanel } from "../components/leftPanel";
-import { toDoList } from "../data/toDoList";
 import { finishedToDos } from "../data/finishedToDos";
-import {
-  BrowserRouter as Router,
-  Route,
-  Switch,
-  useHistory,
-} from "react-router-dom";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import { Edit } from "../views/Edit";
 import Swal from "sweetalert2";
 import { FinishedTasks } from "./FinishedTasks";
 import { AddNewTask } from "../views/AddNewTask";
 import axios from "axios";
 
+// Create a context for the To-Do data
+export const ToDoContext = createContext();
+
 function App() {
   const [finishedToDoData, setFinishedToDoData] = useState(finishedToDos);
-  const [toDoData, setData] = useState(toDoList);
+  const [toDoData, setData] = useState([]);
+
+  useEffect(() => {
+    axios.get("http://localhost:3001/ToDos").then((response) => {
+      setData(response.data);
+    });
+  }, []);
 
   const FinishTask = (id) => {
     Swal.fire({
@@ -32,16 +34,16 @@ function App() {
     }).then((result) => {
       if (result.isConfirmed) {
         const Today = new Date();
-        const month = Today.getMonth() + 1;
-        const year = Today.getFullYear();
-        const date = Today.getDate();
-        const fullDate = `${year}-${month}-${date}`;
-        const Task = toDoData.filter((e) => e.id == id);
+        const fullDate = `${Today.getFullYear()}-${
+          Today.getMonth() + 1
+        }-${Today.getDate()}`;
+        const Task = toDoData.find((e) => e.id === id);
         Task.FinishDate = fullDate;
         Task.finished = true;
-        setData(toDoData.filter((e) => e.id != id));
-        finishedToDoData.push(Task);
-        setFinishedToDoData(finishedToDoData);
+
+        // Remove the task from toDoData and add it to finishedToDoData
+        setData(toDoData.filter((e) => e.id !== id));
+        setFinishedToDoData([...finishedToDoData, Task]);
         Swal.fire("Task Finished!", "", "success");
       } else if (result.isDenied) {
         Swal.fire("Finishing Canceled", "", "info");
@@ -58,7 +60,7 @@ function App() {
       denyButtonText: `No`,
     }).then((result) => {
       if (result.isConfirmed) {
-        const newData = toDoData.filter((user) => user.id !== id);
+        const newData = toDoData.filter((task) => task.id !== id);
         setData(newData);
         Swal.fire("Deleted!", "", "success");
       } else if (result.isDenied) {
@@ -66,25 +68,31 @@ function App() {
       }
     });
   };
+
   return (
-    <>
+    <ToDoContext.Provider
+      value={{
+        toDoData,
+        setData,
+        finishedToDoData,
+        setFinishedToDoData,
+        FinishTask,
+        deleteItemFunction,
+      }}
+    >
       <Router>
         <GlobalStyle />
         <StyledBody>
           <Switch>
             <Route exact path="/">
               <LeftPanel />
-              <ToDoBody
-                toDoData={toDoData}
-                DeleteItem={deleteItemFunction}
-                FinishFunction={FinishTask}
-              />
+              <ToDoBody />
             </Route>
             <Route exact path="/edit/:itemId">
               <Edit />
             </Route>
             <Route exact path="/FinishedTasks">
-              <FinishedTasks finishedToDoData={finishedToDoData} />
+              <FinishedTasks />
             </Route>
             <Route exact path="/AddNewTask">
               <AddNewTask />
@@ -92,7 +100,7 @@ function App() {
           </Switch>
         </StyledBody>
       </Router>
-    </>
+    </ToDoContext.Provider>
   );
 }
 

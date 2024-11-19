@@ -1,7 +1,7 @@
 {
   "development": {
     "username": "root",
-    "password": "BaronBlue1403",
+    "password": "",
     "database": "TDLDB",
     "host": "127.0.0.1",
     "dialect": "mysql"

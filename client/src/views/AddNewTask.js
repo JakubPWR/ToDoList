@@ -1,31 +1,37 @@
-import { React, useState, useEffect } from "react";
+import { React, useEffect, useContext } from "react";
 import { AddStyledForm } from "../styles/addFormStyles";
 import { useHistory } from "react-router-dom";
-import { toDo } from "../classes/toDoClass";
+import { ToDoContext } from "../views/App";
 import axios from "axios";
 
-export const AddNewTask = (e) => {
-  const [data, setData] = useState([]);
+export const AddNewTask = () => {
+  const { toDoData, setData } = useContext(ToDoContext);
   useEffect(() => {
-    axios.get("http://localhost:3001/ToDos").then((response) => {
+    axios.get("http://localhost:5000/ToDos").then((response) => {
       setData(response.data);
     });
   }, []);
   const history = useHistory();
   const handleSubmit = (e) => {
     e.preventDefault();
-    let Id = data.length !== 0 ? data[data.length - 1].id + 1 : 0;
     const formData = new FormData(e.currentTarget);
     const name = formData.get("taskName");
     const Today = new Date();
     const fullDate = `${Today.getFullYear()}-${
       Today.getMonth() + 1
     }-${Today.getDate()}`;
-    const newTask = new toDo(Id, name, fullDate, null, 0);
+    const newTask = {
+      name: name,
+      AddDate: fullDate,
+      FinishDate: null,
+      finished: 0,
+    };
     axios
-      .post("http://localhost:3001/ToDos", newTask)
+      .post("http://localhost:5000/ToDos", newTask)
       .then(() => {
-        setData([...data, newTask]); // Add the new task to the local state
+        axios.get("http://localhost:5000/ToDos").then((response) => {
+          setData(response.data);
+        });
         history.push("/");
       })
       .catch((error) => {

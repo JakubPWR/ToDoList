@@ -4,25 +4,44 @@ import { GlobalStyle } from "../styles/globalStyles";
 import { ToDoBody } from "../components/toDoBody";
 import { LeftPanel } from "../components/leftPanel";
 import { finishedToDos } from "../data/finishedToDos";
-import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Switch,
+  useLocation,
+} from "react-router-dom";
 import { Edit } from "../views/Edit";
 import Swal from "sweetalert2";
 import { FinishedTasks } from "./FinishedTasks";
 import { AddNewTask } from "../views/AddNewTask";
 import axios from "axios";
 
-// Create a context for the To-Do data
 export const ToDoContext = createContext();
 
 function App() {
   const [finishedToDoData, setFinishedToDoData] = useState(finishedToDos);
   const [toDoData, setData] = useState([]);
+  const location = useLocation();
+  const fetchToDoData = () => {
+    axios
+      .get("http://localhost:5000/ToDos")
+      .then((response) => {
+        setData(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching To-Do data:", error);
+      });
+  };
 
   useEffect(() => {
-    axios.get("http://localhost:3001/ToDos").then((response) => {
-      setData(response.data);
-    });
+    fetchToDoData();
   }, []);
+
+  useEffect(() => {
+    if (location.pathname === "/") {
+      fetchToDoData();
+    }
+  }, [location]);
 
   const FinishTask = (id) => {
     Swal.fire({
@@ -40,6 +59,8 @@ function App() {
         const Task = toDoData.find((e) => e.id === id);
         Task.FinishDate = fullDate;
         Task.finished = true;
+        axios.patch(`http://localhost:5000/ToDos/finish/${id}`, Task);
+        axios.delete(`http://localhost:5000/ToDos/delete/${id}`);
 
         // Remove the task from toDoData and add it to finishedToDoData
         setData(toDoData.filter((e) => e.id !== id));
@@ -60,9 +81,17 @@ function App() {
       denyButtonText: `No`,
     }).then((result) => {
       if (result.isConfirmed) {
-        const newData = toDoData.filter((task) => task.id !== id);
-        setData(newData);
-        Swal.fire("Deleted!", "", "success");
+        axios
+          .delete(`http://localhost:5000/ToDos/delete/${id}`)
+          .then(() => {
+            // Immediately update the state by filtering out the deleted item
+            setData((prevData) => prevData.filter((item) => item.id !== id));
+            Swal.fire("Deleted!", "", "success");
+          })
+          .catch((error) => {
+            console.error("Error deleting item:", error);
+            Swal.fire("Error deleting item", "", "error");
+          });
       } else if (result.isDenied) {
         Swal.fire("Deletion cancelled", "", "info");
       }
@@ -88,7 +117,7 @@ function App() {
               <LeftPanel />
               <ToDoBody />
             </Route>
-            <Route exact path="/edit/:itemId">
+            <Route exact path="/Edit/:itemId">
               <Edit />
             </Route>
             <Route exact path="/FinishedTasks">

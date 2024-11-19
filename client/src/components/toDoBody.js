@@ -1,12 +1,14 @@
-import React from "react";
+import React, { useContext } from "react";
 import { TableHeader, ToDoBodyStyle } from "../styles/toDoBodyStyles";
 import { ToDoItem } from "../components/toDoItem";
 import { useHistory } from "react-router-dom";
 import { StyledButton } from "../styles/buttonStyles";
+import { ToDoContext } from "../views/App";
 
-export const ToDoBody = ({ toDoData, DeleteItem, AddTask, FinishFunction }) => {
+export const ToDoBody = () => {
+  const { toDoData, FinishTask, deleteItemFunction } = useContext(ToDoContext);
   const history = useHistory();
-  const NavigateToEdit = (id) => {
+  const editItemFunction = (id) => {
     history.push(`/Edit/${id}`);
   };
   const NavigateToFinished = () => {
@@ -36,9 +38,9 @@ export const ToDoBody = ({ toDoData, DeleteItem, AddTask, FinishFunction }) => {
         <ToDoItem
           toDoData={item}
           key={item.id}
-          NavigateToEditFunction={() => NavigateToEdit(item.id)}
-          DeleteFunction={() => DeleteItem(item.id)}
-          FinishFunction={() => FinishFunction(item.id)}
+          EditItemFunction={() => editItemFunction(item.id)}
+          DeleteFunction={() => deleteItemFunction(item.id)}
+          FinishFunction={() => FinishTask(item.id)}
         />
       ))}
     </ToDoBodyStyle>

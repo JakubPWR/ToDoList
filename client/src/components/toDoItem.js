@@ -1,14 +1,13 @@
-import React from "react";
+import React, { useContext } from "react";
 import { StyledButton, EditButton } from "../styles/buttonStyles";
-import { ReactComponent as CircleIcon } from "../icons/circle.svg";
 import { TableRow } from "../styles/toDoBodyStyles";
 import { StyledButtonContainer } from "../styles/buttonContainerStyles";
 
 export const ToDoItem = ({
   toDoData: { id, name, AddDate, FinishDate, finished },
-  NavigateToEditFunction,
   DeleteFunction,
   FinishFunction,
+  EditItemFunction,
 }) => {
   return (
     <TableRow>
@@ -30,10 +29,8 @@ export const ToDoItem = ({
         {finished ? "Yes" : "No"}
       </div>
       <StyledButtonContainer>
-        <EditButton onClick={() => NavigateToEditFunction({ id })}>
-          Edit
-        </EditButton>
-        <EditButton onClick={() => DeleteFunction({ id })}>Delete</EditButton>
+        <EditButton onClick={() => EditItemFunction(id)}>Edit</EditButton>
+        <EditButton onClick={() => DeleteFunction(id)}>Delete</EditButton>
       </StyledButtonContainer>
     </TableRow>
   );

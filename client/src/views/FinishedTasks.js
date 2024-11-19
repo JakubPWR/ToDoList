@@ -1,11 +1,19 @@
-import React from "react";
+import React, { useContext, useEffect } from "react";
 import { TableHeader, ToDoBodyStyle } from "../styles/toDoBodyStyles";
 import { ToDoItem } from "../components/toDoItem";
 import { useHistory } from "react-router-dom";
 import { StyledButton } from "../styles/buttonStyles";
+import { ToDoContext } from "../views/App";
+import axios from "axios";
 
-export const FinishedTasks = ({ finishedToDoData, DeleteItem }) => {
+export const FinishedTasks = ({ DeleteItem }) => {
+  const { finishedToDoData, setFinishedToDoData } = useContext(ToDoContext);
   const history = useHistory();
+  useEffect(() => {
+    axios.get("http://localhost:5000/ToDos/finished").then((response) => {
+      setFinishedToDoData(response.data);
+    });
+  }, []);
   const NavigateToHomePage = () => {
     history.push("/");
   };

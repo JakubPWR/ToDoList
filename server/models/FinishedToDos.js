@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  const ToDos = sequelize.define("ToDos", {
+  const FinishedToDos = sequelize.define("FinishedToDos", {
     name: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     FinishDate: {
       type: DataTypes.STRING,
-      allowNull: true,
+      allowNull: false,
     },
     finished: {
       type: DataTypes.TINYINT(1),
@@ -18,5 +18,5 @@ module.exports = (sequelize, DataTypes) => {
     },
   });
 
-  return ToDos;
+  return FinishedToDos;
 };

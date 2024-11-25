@@ -16,7 +16,22 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.TINYINT(1),
       allowNull: false,
     },
+    listId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: "ToDoLists",
+        key: "id",
+      },
+    },
   });
+
+  ToDos.associate = (models) => {
+    ToDos.belongsTo(models.ToDoLists, {
+      foreignKey: "listId",
+      onDelete: "CASCADE",
+    });
+  };
 
   return ToDos;
 };

@@ -40,3 +40,46 @@ export const EditButton = styled.button`
     box-shadow: none; /* Remove shadow when clicked */
   }
 `;
+export const LeftPanelButton = styled.button`
+  font-size: large;
+  font-weight: bold;
+  height: 50px;
+  width: 250px;
+  border-radius: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: red;
+  border: none;
+  padding: 0;
+  transition: 200ms;
+  margin-bottom: 20px;
+  &:hover {
+    cursor: pointer;
+    box-shadow: 5px 5px 5px black;
+  }
+  &:active {
+    box-shadow: none;
+  }
+`;
+export const TabelHeaderButton = styled.button`
+  font-size: large;
+  font-weight: bold;
+  height: 50px;
+  width: 200px;
+  border-radius: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: red;
+  border: none;
+  padding: 0;
+  transition: 200ms;
+  &:hover {
+    cursor: pointer;
+    box-shadow: 5px 5px 5px black;
+  }
+  &:active {
+    box-shadow: none;
+  }
+`;

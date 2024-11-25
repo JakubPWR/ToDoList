@@ -5,7 +5,7 @@ import { ToDoContext } from "../views/App";
 import axios from "axios";
 
 export const Edit = () => {
-  const { toDoData, setData } = useContext(ToDoContext);
+  const { toDoData, setData, currentToDoList } = useContext(ToDoContext);
   const { itemId } = useParams();
   const [toDoItem, setToDoItem] = useState(null);
   useEffect(() => {
@@ -36,9 +36,13 @@ export const Edit = () => {
     axios
       .patch(`http://localhost:5000/ToDos/edit/${itemId}`, update)
       .then(async () => {
-        axios.get("http://localhost:5000/ToDos").then((response) => {
-          setData(response.data);
-        });
+        axios
+          .get("http://localhost:5000/ToDos/byListId", {
+            headers: { id: currentToDoList },
+          })
+          .then((response) => {
+            setData(response.data);
+          });
       });
     history.push("/");
   };

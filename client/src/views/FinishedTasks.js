@@ -7,17 +7,33 @@ import { ToDoContext } from "../views/App";
 import axios from "axios";
 
 export const FinishedTasks = ({ DeleteItem }) => {
-  const { finishedToDoData, setFinishedToDoData } = useContext(ToDoContext);
+  const { finishedToDoData, setFinishedToDoData, logged, currentToDoList } =
+    useContext(ToDoContext);
   const history = useHistory();
   useEffect(() => {
-    axios.get("http://localhost:5000/ToDos/finished").then((response) => {
-      setFinishedToDoData(response.data);
-    });
+    const jwt = sessionStorage.getItem("accessToken");
+    axios
+      .get("http://localhost:5000/auth/user", {
+        headers: {
+          jwt: jwt,
+        },
+      })
+      .then((response) => {
+        axios
+          .get("http://localhost:5000/ToDos/finished", {
+            headers: { id: currentToDoList },
+          })
+          .then((response) => {
+            setFinishedToDoData(response.data);
+          });
+      });
   }, []);
   const NavigateToHomePage = () => {
     history.push("/");
   };
-  if (finishedToDoData.length === 0) {
+  if (!logged) {
+    history.push("/login");
+  } else if (finishedToDoData.length === 0) {
     return (
       <ToDoBodyStyle>
         <TableHeader>

@@ -5,7 +5,8 @@ import { ToDoContext } from "../views/App";
 import axios from "axios";
 
 export const AddNewTask = () => {
-  const { toDoData, setData } = useContext(ToDoContext);
+  const { toDoData, setData, logged, currentToDoList } =
+    useContext(ToDoContext);
   useEffect(() => {
     axios.get("http://localhost:5000/ToDos").then((response) => {
       setData(response.data);
@@ -25,9 +26,14 @@ export const AddNewTask = () => {
       AddDate: fullDate,
       FinishDate: null,
       finished: 0,
+      listId: currentToDoList,
     };
     axios
-      .post("http://localhost:5000/ToDos", newTask)
+      .post("http://localhost:5000/ToDos", newTask, {
+        headers: {
+          accessToken: sessionStorage.getItem("accessToken"),
+        },
+      })
       .then(() => {
         axios.get("http://localhost:5000/ToDos").then((response) => {
           setData(response.data);
@@ -38,6 +44,9 @@ export const AddNewTask = () => {
         console.error("Error adding task:", error);
       });
   };
-
-  return <AddStyledForm submitFunction={handleSubmit} />;
+  if (logged) {
+    return <AddStyledForm submitFunction={handleSubmit} />;
+  } else {
+    history.push("/login");
+  }
 };

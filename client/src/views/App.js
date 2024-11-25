@@ -15,31 +15,55 @@ import Swal from "sweetalert2";
 import { FinishedTasks } from "./FinishedTasks";
 import { AddNewTask } from "../views/AddNewTask";
 import axios from "axios";
+import { Login } from "../views/Login";
+import { Registration } from "../views/Registration";
+import { AddNewToDoList } from "../views/AddNewToDoList";
+import { ToDoLists } from "./ToDoLists";
 
 export const ToDoContext = createContext();
 
 function App() {
   const [finishedToDoData, setFinishedToDoData] = useState(finishedToDos);
   const [toDoData, setData] = useState([]);
+  const [logged, setLogged] = useState(false);
+  const [currentToDoList, setCurrentToDoList] = useState("");
   const location = useLocation();
-  const fetchToDoData = () => {
-    axios
-      .get("http://localhost:5000/ToDos")
-      .then((response) => {
-        setData(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching To-Do data:", error);
-      });
+  const [toDoListName, setToDoListName] = useState("");
+
+  const GetUser = () => {
+    const authenticated = sessionStorage.getItem("accessToken");
+    if (authenticated) {
+      setLogged(true);
+    }
   };
+  // const fetchToDoData = () => {
+  //   if (currentToDoList === "") {
+  //     return;
+  //   }
+  //   axios
+  //     .get("http://localhost:5000/ToDos/byListId", {
+  //       headers: {
+  //         id: currentToDoList,
+  //       },
+  //     })
+  //     .then((response) => {
+  //       console.log(response);
+  //       setData(response.data);
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error fetching To-Do data:", error);
+  //     });
+  // };
 
   useEffect(() => {
-    fetchToDoData();
+    // fetchToDoData();
+    GetUser();
   }, []);
 
   useEffect(() => {
     if (location.pathname === "/") {
-      fetchToDoData();
+      // fetchToDoData();
+      GetUser();
     }
   }, [location]);
 
@@ -59,6 +83,7 @@ function App() {
         const Task = toDoData.find((e) => e.id === id);
         Task.FinishDate = fullDate;
         Task.finished = true;
+        Task.listId = currentToDoList;
         axios.patch(`http://localhost:5000/ToDos/finish/${id}`, Task);
         axios.delete(`http://localhost:5000/ToDos/delete/${id}`);
 
@@ -71,7 +96,6 @@ function App() {
       }
     });
   };
-
   const deleteItemFunction = (id) => {
     Swal.fire({
       title: "Are you sure you want to delete this item",
@@ -101,18 +125,27 @@ function App() {
   return (
     <ToDoContext.Provider
       value={{
+        logged,
+        setLogged,
         toDoData,
         setData,
         finishedToDoData,
         setFinishedToDoData,
         FinishTask,
         deleteItemFunction,
+        currentToDoList,
+        setCurrentToDoList,
+        toDoListName,
+        setToDoListName,
       }}
     >
       <Router>
         <GlobalStyle />
         <StyledBody>
           <Switch>
+            <Route exact path="/Login">
+              <Login />
+            </Route>
             <Route exact path="/">
               <LeftPanel />
               <ToDoBody />
@@ -125,6 +158,16 @@ function App() {
             </Route>
             <Route exact path="/AddNewTask">
               <AddNewTask />
+            </Route>
+            <Route exact path="/Registration">
+              <Registration />
+            </Route>
+            <Route exact path="/AddNewToDoList">
+              <AddNewToDoList />
+            </Route>
+            <Route exact path="/ToDoLists">
+              <LeftPanel />
+              <ToDoLists />
             </Route>
           </Switch>
         </StyledBody>
